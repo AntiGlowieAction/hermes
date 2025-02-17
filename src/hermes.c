@@ -3,14 +3,13 @@
 #include "../include/hermes.h"
 #include <string.h>
 #include <ctype.h>
-#define halloc(type) (type*)malloc(sizeof(type))
-#define herror(info) do{ \
-                        printf(info); \
-                        exit(1); \
-                        }while(0)
 
+#define halloc(type) (type*) malloc(sizeof(type))
 
-    
+#define herror(info) do { \
+    printf(info); \
+    exit(1); \
+    } while(0)
 
 char* hopen(const char *path){
     FILE *file = fopen(path, "r");
@@ -19,9 +18,8 @@ char* hopen(const char *path){
         herror("No file found!!!");
     }
 
-    long len;
     fseek(file, 0, SEEK_END);
-    len = ftell(file);
+    long len = ftell(file);
     fseek(file, 0, SEEK_SET);
     char *source = (char*) malloc((len + 1)*sizeof(char));
 
@@ -50,7 +48,6 @@ void hlexidn(char **src, htoken *token) {
     }
 
     token->sval = strndup(pos, crs - pos);
-    printf("This is a debug statement %s\n", token->sval);
 
     if(!strcmp(token->sval, "true")) {
         token->type = TK_TRUE;
@@ -69,17 +66,19 @@ void hlexnum(char **src, htoken *token) {
     token->type = TK_INT;
 
     char *pos = *src;
-    int len = 0;
-    while(isdigit(**src) || **src == '.') {
-        if(**src == '.') token->type = TK_VERSION;
-        len++;
-        (*src)++;
+    char *crs = pos;
+
+    while(isdigit(*crs) || **src == '.') {
+        if(*crs == '.') {
+            token->type = TK_VERSION;
+        }
+        crs++;
     }
 
-    token->sval = strndup(pos, len);
-    
-    if(token->type == TK_INT) {
+    if (token->type == TK_INT) {
         token->ival = atoi(token->sval);
+    } else {
+        token->sval = strndup(pos, crs-pos);
     }
 
 }
@@ -101,13 +100,11 @@ void hlexstr(char **src, htoken *token) {
     *src = crs + 1;
 }
 
-
 htoken* hlex(char *src) {
     htoken *head = NULL;
     htoken *tail = NULL;
     
     while(*src){
-
         if(isspace(*src)) {
             while(isspace(*src)) src++;
             continue;
@@ -122,21 +119,18 @@ htoken* hlex(char *src) {
 
         if(isalpha(*src)){
             hlexidn(&src, token);
-            continue;
         }
 
-        if(isdigit(*src)){
+        else if(isdigit(*src)){
             hlexnum(&src, token);
-            continue;
         }
 
-        if(*src == '"'){
+        else if(*src == '"'){
             hlexstr(&src, token);
-            continue;
         }
         
-        switch (*src) {
-            
+        else {
+            switch (*src) {
             case '[':
                 token->type = TK_LBRACK;
                 break;
@@ -151,38 +145,67 @@ htoken* hlex(char *src) {
                 break;
             default:
                 herror("Unexpected character!!!");
+            }
+            src++;
         }
 
         if(tail) {
             tail->next = token;
             tail = token;
         }
-
-        src++;
     }
+
     return head;
 }
 
+void hprntoken(htoken *token) {
+    if (!token) return;
 
+    switch (token->type) {
+        case TK_IDEN:
+            printf("IDN %s\n", token->sval);
+            break;
+        case TK_LBRACK:
+            printf("SYMB [\n");
+            break;
+        case TK_RBRACK:
+            printf("SYM ]\n");
+            break;
+        case TK_COLON:
+            printf("SYM :\n");
+            break;
+        case TK_EQUALS:
+            printf("SYM =\n");
+            break;
+        case TK_VERSION:
+            printf("VER %s\n", token->sval);
+            break;
+        case TK_STRING:
+            printf("STR %s\n", token->sval);
+            break;
+        case TK_INT:
+            printf("INT %d\n", token->ival);
+            break;
+        case TK_TRUE:
+            printf("TRUE\n");
+            break;
+        case TK_FALSE:
+            printf("FALSE\n");
+            break;
+        default:
+            printf("UNKNOWN TOKEN TYPE %d\n", token->type);
+            break;
+    }
+
+    if (token->next) {
+        hprntoken(token->next);
+    }
+}
 
 
 int main(int argc, char **argv) {
-
-
     char *path = hopen("test.hm");
-    htoken *lexstream = hlex(path);
-
-    while(lexstream){
-        printf("ival of token is %d\n", lexstream->ival);
-        if(lexstream->sval) printf("sval of token is %s\n", lexstream->sval);
-        printf("\n\n");
-        
-        
-        lexstream = lexstream->next;
-    }
-
-    
-
-
+    htoken *tokens = hlex(path);
+    hprntoken(tokens);
     return 0;
 }

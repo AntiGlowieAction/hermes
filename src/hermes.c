@@ -12,8 +12,7 @@
 
     
 
-char* hopen(char *path){
-    
+char* hopen(const char *path){
     FILE *file = fopen(path, "r");
     
     if(!file){
@@ -21,16 +20,16 @@ char* hopen(char *path){
     }
 
     long len;
-    fseek(file, SEEK_END, 0);
+    fseek(file, 0, SEEK_END);
     len = ftell(file);
-    fseek(file, SEEK_SET, 0);
+    fseek(file, 0, SEEK_SET);
     char *source = (char*) malloc((len + 1)*sizeof(char));
 
     if(!source){
         herror("Could not get memory!!!");
     }
     
-    if(fread(source, 1, len, file) < len) {
+    if(fread(source, 1, len, file) != len) {
         herror("Could not read source!!!");
     }
 
@@ -44,13 +43,14 @@ void hlexidn(char **src, htoken *token) {
     token->type = TK_IDEN;
 
     char *pos = *src;
-    int len = 0;
-    while(isalnum(**src) || **src == '_' || **src == '-'){
-        len++;
-        (*src)++;
+    char *crs = *src;
+
+    while(isalnum(*crs) || *crs == '_' || *crs == '-'){
+        crs++;
     }
-    token->sval = strndup(pos, len);
-    printf("This is a debug statement %s", token->sval);
+
+    token->sval = strndup(pos, crs - pos);
+    printf("This is a debug statement %s\n", token->sval);
 
     if(!strcmp(token->sval, "true")) {
         token->type = TK_TRUE;
@@ -62,8 +62,7 @@ void hlexidn(char **src, htoken *token) {
         token->ival = 0;
     }
 
-
-
+    *src = crs;
 }
 
 void hlexnum(char **src, htoken *token) {
@@ -88,19 +87,22 @@ void hlexnum(char **src, htoken *token) {
 void hlexstr(char **src, htoken *token) {
     token->type = TK_STRING;
 
-    char *pos = *src;
-    int len = 0;
-    while(**src != '"') {
-        len++;
-        (*src)++;
-    }
-    token->sval = strndup(pos, len);
+    char *pos = *src + 1;
+    char *crs = pos;
 
+    while(*crs != '"') {
+        if (*crs == '\n') {
+            herror("Unexpected newline.");
+        }
+        crs++;
+    }
+    
+    token->sval = strndup(pos, crs-pos);
+    *src = crs + 1;
 }
 
 
 htoken* hlex(char *src) {
-
     htoken *head = NULL;
     htoken *tail = NULL;
     

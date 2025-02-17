@@ -10,14 +10,16 @@ enum htoktype {
     TK_EQUALS,
     TK_VERSION,
     TK_STRING,
-    TK_BOOL,
     TK_INT,
+    TK_TRUE,
+    TK_FALSE
 };
 
-typedef struct {
+typedef struct htoken {
     enum htoktype type;
     int ival;
     char *sval;
+    struct htoken *next;
 
 }htoken;
 

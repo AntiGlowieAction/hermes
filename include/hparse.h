@@ -1,34 +1,6 @@
-#include <stdint.h>
-#include <stdbool.h>
+#include <stddef.h>
 
-#define halloc(type) (type*) malloc(sizeof(type))
-
-#define herror(info) \
-    do { \
-        printf(info); \
-        exit(1); \
-    } while(0)
-
-enum htoktype {
-    TK_IDEN,
-    TK_LBRACK,
-    TK_RBRACK,
-    TK_COLON,
-    TK_EQUALS,
-    TK_VERSION,
-    TK_STRING,
-    TK_INT,
-    TK_TRUE,
-    TK_FALSE
-};
-
-typedef struct htoken {
-    enum htoktype type;
-    int ival;
-    char *sval;
-    struct htoken *next;
-
-}htoken;
+#include "hlex.h"
 
 enum henrtype {
     EN_TABLE,
@@ -38,22 +10,17 @@ enum henrtype {
     EN_INTEGER
 };
 
-
-typedef struct {
+typedef struct hentry {
     char *key;
     enum henrtype type;
     void *value;
+    struct hentry *next;
 } hentry;
 
 typedef struct {
     hentry **entries;
     size_t size;
 } htable;
-
-typedef struct {
-    char *str;
-    int *list;
-} hversion;
 
 hentry* hget(htable *tab, const char *key);
 unsigned int hgetint(htable *tab, const char *key);

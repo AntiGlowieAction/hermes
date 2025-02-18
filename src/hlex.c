@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <ctype.h>
 
-#include "../include/hermes.h"
+#include "../include/hlex.h"
 
 char* hopen(const char *path){
     FILE *file = fopen(path, "r");
@@ -34,19 +34,18 @@ char* hopen(const char *path){
 void hlexidn(char **src, htoken *token) {
     token->type = TK_IDEN;
 
-    char *pos = *src;
     char *crs = *src;
 
     while(isalnum(*crs) || *crs == '_' || *crs == '-'){
         crs++;
     }
 
-    token->sval = strndup(pos, crs - pos);
-
-    if (!strcmp(token->sval, "true")) {
+    if (!strcmp(*src, "true")) {
         token->type = TK_TRUE;
-    } else if (!strcmp(token->sval, "false")) {
+    } else if (!strcmp(*src, "false")) {
         token->type = TK_FALSE;
+    } else {
+        token->sval = strndup(*src, crs - *src);
     }
 
     *src = crs;
@@ -193,9 +192,4 @@ void hprntoken(htoken *token) {
 }
 
 
-int main(int argc, char **argv) {
-    char *path = hopen("test.hm");
-    htoken *tokens = hlex(path);
-    hprntoken(tokens);
-    return 0;
-}
+

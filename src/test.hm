@@ -1,4 +1,9 @@
 debug = true
 project_name = "Hermes"
+
 [require]
 libcurl = 1.0.0
+
+[build:myX86Build]
+opt-level = 3
+static = false

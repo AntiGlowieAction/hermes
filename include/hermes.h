@@ -1,6 +1,14 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#define halloc(type) (type*) malloc(sizeof(type))
+
+#define herror(info) \
+    do { \
+        printf(info); \
+        exit(1); \
+    } while(0)
+
 enum htoktype {
     TK_IDEN,
     TK_LBRACK,

@@ -1,15 +1,9 @@
-#include <stdio.h>
 #include <stdlib.h>
-#include "../include/hermes.h"
 #include <string.h>
+#include <stdio.h>
 #include <ctype.h>
 
-#define halloc(type) (type*) malloc(sizeof(type))
-
-#define herror(info) do { \
-    printf(info); \
-    exit(1); \
-    } while(0)
+#include "../include/hermes.h"
 
 char* hopen(const char *path){
     FILE *file = fopen(path, "r");
@@ -49,14 +43,10 @@ void hlexidn(char **src, htoken *token) {
 
     token->sval = strndup(pos, crs - pos);
 
-    if(!strcmp(token->sval, "true")) {
+    if (!strcmp(token->sval, "true")) {
         token->type = TK_TRUE;
-        token->ival = 1;
-    }
-
-    if(!strcmp(token->sval, "false")) {
+    } else if (!strcmp(token->sval, "false")) {
         token->type = TK_FALSE;
-        token->ival = 0;
     }
 
     *src = crs;
@@ -76,7 +66,7 @@ void hlexnum(char **src, htoken *token) {
     }
 
     if (token->type == TK_INT) {
-        token->ival = atoi(token->sval);
+        token->ival = atoi(pos);
     } else {
         token->sval = strndup(pos, crs-pos);
     }
@@ -105,55 +95,54 @@ htoken* hlex(char *src) {
     htoken *head = NULL;
     htoken *tail = NULL;
     
-    while(*src){
-        if(isspace(*src)) {
+    while (*src) {
+        if (isspace(*src)) {
             while(isspace(*src)) src++;
             continue;
         }
 
         htoken *token = halloc(htoken);
 
-        if(!head) {
+        if (!head) {
             head = token;
             tail = token;
-        }
-
-        if(isalpha(*src)){
-            hlexidn(&src, token);
-        }
-
-        else if(isdigit(*src)){
-            hlexnum(&src, token);
-        }
-
-        else if(*src == '"'){
-            hlexstr(&src, token);
-        }
-        
-        else {
-            switch (*src) {
-            case '[':
-                token->type = TK_LBRACK;
-                break;
-            case ']':
-                token->type = TK_RBRACK;
-                break;
-            case ':':
-                token->type = TK_COLON;
-                break;
-            case '=':
-                token->type = TK_EQUALS;
-                break;
-            default:
-                herror("Unexpected character!!!");
-            }
-            src++;
-        }
-
-        if(tail) {
+        } else {
             tail->next = token;
             tail = token;
         }
+
+        if (isalpha(*src)){
+            hlexidn(&src, token);
+            continue;
+        }
+
+        if (isdigit(*src)){
+            hlexnum(&src, token);
+            continue;
+        }
+
+        if (*src == '"'){
+            hlexstr(&src, token);
+            continue;
+        }
+        
+        switch (*src) {
+        case '[':
+            token->type = TK_LBRACK;
+            break;
+        case ']':
+            token->type = TK_RBRACK;
+            break;
+        case ':':
+            token->type = TK_COLON;
+            break;
+        case '=':
+            token->type = TK_EQUALS;
+            break;
+        default:
+            herror("Unexpected character!!!");
+        }
+        src++;
     }
 
     return head;
@@ -167,7 +156,7 @@ void hprntoken(htoken *token) {
             printf("IDN %s\n", token->sval);
             break;
         case TK_LBRACK:
-            printf("SYMB [\n");
+            printf("SYM [\n");
             break;
         case TK_RBRACK:
             printf("SYM ]\n");

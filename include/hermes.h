@@ -2,7 +2,6 @@
 #include <stdbool.h>
 
 enum htoktype {
-    
     TK_IDEN,
     TK_LBRACK,
     TK_RBRACK,
@@ -24,13 +23,11 @@ typedef struct htoken {
 }htoken;
 
 enum henrtype {
-
     EN_TABLE,
     EN_VERSION,
     EN_BOOL,
     EN_STRING,
     EN_INTEGER
-
 };
 
 
@@ -38,20 +35,16 @@ typedef struct {
     char *key;
     enum henrtype type;
     void *value;
-
 } hentry;
 
 typedef struct {
-    
     hentry **entries;
     size_t size;
-
 } htable;
 
 typedef struct {
     char *str;
     int *list;
-
 } hversion;
 
 hentry* hget(htable *tab, const char *key);

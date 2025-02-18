@@ -68,7 +68,7 @@ void hlexnum(char **src, htoken *token) {
     char *pos = *src;
     char *crs = pos;
 
-    while(isdigit(*crs) || **src == '.') {
+    while(isdigit(*crs) || *crs == '.') {
         if(*crs == '.') {
             token->type = TK_VERSION;
         }
@@ -81,6 +81,7 @@ void hlexnum(char **src, htoken *token) {
         token->sval = strndup(pos, crs-pos);
     }
 
+    *src = crs;
 }
 
 void hlexstr(char **src, htoken *token) {

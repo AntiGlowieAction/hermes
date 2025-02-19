@@ -11,7 +11,7 @@ enum henrtype {
 };
 
 typedef struct hentry {
-    char *key;
+    const char *key;
     enum henrtype type;
     void *value;
     struct hentry *next;

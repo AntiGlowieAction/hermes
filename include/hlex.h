@@ -9,7 +9,7 @@
     } while(0)
 
 #define halloc(type) \
-    ({ type *p = (type*) calloc(sizeof(type), 1); \
+    ({ type *p = (type*) calloc(1, sizeof(type)); \
      if (!p) herror("Memory allocation failed!!!\n"); \
      p; }) 
 
@@ -44,3 +44,4 @@ typedef struct {
 htoken* hlex(char *src);
 char* hopen(const char *path);
 
+void hprntoken(htoken *token);

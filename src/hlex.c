@@ -13,7 +13,7 @@ char* hopen(const char *path){
     }
 
     fseek(file, 0, SEEK_END);
-    long len = ftell(file);
+    size_t len = ftell(file);
     fseek(file, 0, SEEK_SET);
     char *source = (char*) malloc((len + 1)*sizeof(char));
 

@@ -1,16 +1,16 @@
 #include <stdint.h>
-#include<stdlib.h>
+#include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "../include/hparse.h"
 
+uint32_t djb2(const char *str) {
+    unsigned const char *ptr = (unsigned const char *)str;
 
-
-uint32_t djb2(unsigned char *str) {
     uint32_t hash = 5381;
     int c;
-
-    while (c = *str++) {
+    while ((c = *ptr++)) {
         hash = hash * 33 + c;
     }
 
@@ -73,7 +73,7 @@ void hset(htable *tab, const char *key, enum henrtype type, void *val) {
     }
 
     while(entry->next){
-        if(!strcmp(key, entry->key) {
+        if(!strcmp(key, entry->key)) {
             free(entry->value);
             entry->type = type;
             entry->value = val;
@@ -101,9 +101,9 @@ htable* hcreatetab(size_t size) {
     return tab;
 }
 
-
-int main(int argc, char **argv) {
+int main() {
     char *path = hopen("test.hm");
     htoken *tokens = hlex(path);
+    hprntoken(tokens);
     return 0;
 }
